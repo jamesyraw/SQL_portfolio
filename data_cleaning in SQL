@@ -1,0 +1,307 @@
+DROP TABLE IF EXISTS demographics;
+
+CREATE TABLE demographics (
+  	responseID INT NOT NULL,
+  	age varchar(20),
+  	country VARCHAR(255),
+  	state VARCHAR(255),
+  	city VARCHAR(255),
+  	education VARCHAR(255),
+  	gender VARCHAR(255),
+  	race VARCHAR(255),
+  PRIMARY KEY (responseid)
+  );
+  
+DROP TABLE IF EXISTS professions;
+ 
+CREATE TABLE professions (
+  	responseid INT NOT NULL,
+   	industry VARCHAR(255),
+   	job_title VARCHAR(255),
+   	addl_context VARCHAR(255),
+   	salary INT,
+   	addl_compensation VARCHAR(255),
+   	currency VARCHAR(255),
+   	currency_other VARCHAR(255),
+   	income_context VARCHAR (255),
+   	professional_exp VARCHAR (255),
+   	field_exp VARCHAR (255),
+  PRIMARY KEY (responseid)
+   );
+   
+CREATE TABLE professions_new (
+  	responseid INT NOT NULL,
+  	industry VARCHAR(255),
+  	job_title VARCHAR(255),
+  	salary INT,
+  	addl_compensation VARCHAR(255),
+	currency VARCHAR(255),
+   	currency_other VARCHAR(255),
+   	professional_exp VARCHAR (255),
+   	field_exp VARCHAR (255),
+  PRIMARY KEY (responseid)
+  );
+  
+INSERT INTO professions_new
+SELECT responseid, industry, job_title, salary, addl_compensation, currency, currency_other, professional_exp, field_exp
+FROM professions;
+
+DROP TABLE professions;
+
+ALTER TABLE professions_new RENAME TO professions;
+
+SELECT * FROM demographics;
+
+SELECT DISTINCT country
+FROM demographics
+ORDER BY country;
+
+UPDATE demographics
+SET country = LOWER(country);
+
+UPDATE demographics
+SET country = TRIM(country);
+
+DELETE FROM demographics
+WHERE country LIKE '%$%'
+OR country LIKE '$3$';
+
+-- Update to resolve some long form answers
+UPDATE demographics
+SET country = CASE
+	WHEN country LIKE '%new zealand%' THEN 'new zealand'
+    WHEN country LIKE '%argentina%' THEN 'argentina'
+    WHEN country LIKE '%australi%' THEN 'australia'
+    WHEN country LIKE '%austria%' THEN 'austria'
+    WHEN country LIKE '%canada%' THEN 'canada'
+    WHEN country LIKE '%germany%' THEN 'germany'
+    WHEN country LIKE '%englan%' THEN 'united kingdom'
+    WHEN country LIKE '%united stat%' THEN 'united states'
+    WHEN country LIKE '%romania%' THEN 'romania'
+    WHEN country LIKE '%italy%' then 'italy'
+    WHEN country LIKE '%japan%' THEN 'japan'
+    WHEN country LIKE '%china%' THEN 'china'
+    WHEN country LIKE '%northern ireland%' THEN 'united kingdom'
+    WHEN country LIKE '%phillippines%' THEN 'phillippines'
+    WHEN country LIKE '%scotland%' THEN 'united kingdom'
+    WHEN country LIKE '%america%' THEN 'united states'
+    WHEN country LIKE '%britain%' THEN 'united kingdom'
+    WHEN country LIKE '%u.%s.%' THEN 'united states'
+    WHEN country LIKE '%state%' THEN 'united states'
+    WHEN country LIKE '%wales%' THEN 'united kingdom'
+    WHEN country LIKE '%canad%' THEN 'canada'
+    WHEN country LIKE '%ted s%' THEN 'united states'
+    ELSE country 
+    END;
+
+-- I think that mapping this data is going to be the most optimal route from here 
+CREATE TABLE country_mapping (
+    raw_country TEXT,
+    standardized_country TEXT
+);
+
+INSERT INTO country_mapping (raw_country, standardized_country)
+VALUES
+    ('afghanistan', 'Afghanistan'),
+    ('argentina', 'Argentina'),
+    ('australia', 'Australia'),
+    ('austria', 'Austria'),
+    ('bahamas', 'Bahamas'),
+    ('bermuda', 'Bermuda'),
+    ('belgium', 'Belgium'),
+    ('bosnia', 'Bosnia'),
+    ('d.r. of the congo', 'D.R. of the Congo'),
+    ('ivory coast', 'Ivory Coast'),
+    ('panama', 'Panama'),
+    ('philippines', 'The Phillippines'),
+    ('bangladesh', 'Bangladesh'),
+    ('bosnia and herzegovina', 'Bosnia'),
+    ('brasil', 'Brazil'),
+    ('brazil', 'Brazil'),
+    ('bulgaria', 'Bulgaria'),
+    ('burma', 'Burma'),
+    ('california', 'United States'),
+    ('cambodia', 'Cambodia'),
+    ('can', 'Canada'),
+    ('canada', 'Canada'),
+    ('canda', 'Canada'),
+    ('catalonia', 'Spain'),
+    ('cayman islands', 'United Kingdom'),
+    ('chile', 'Chile'),
+    ('china', 'China'),
+    ('colombia', 'Colombia'),
+    ('congo', 'D.R. of the Congo'),
+    ('costa rica', 'Costa Rica'),
+    ('cote d''ivoire', 'Ivory Coast'),
+    ('croatia', 'Croatia'),
+    ('csnada', 'Canada'),
+    ('cuba', 'Cuba'),
+    ('cyprus', 'Cyprus'),
+    ('czech republic', 'Czechia'),
+    ('czechia', 'Czechia'),
+    ('danmark', 'Denmark'),
+    ('denmark', 'Denmark'),
+    ('ecuador','Ecuador'),
+    ('eritrea', 'Eritrea'),
+    ('estonia', 'Estonia'),
+    ('finland', 'Finland'),
+    ('france', 'France'),
+    ('germany', 'Germany'),
+    ('ghana', 'Ghana'),
+    ('greece', 'Greece'),
+    ('hong kong', 'Hong Kong'),
+    ('hong konh', 'Hong Kong'),
+    ('hungary', 'Hungary'),
+    ('i work for a uae-based organization, though i am personally in the us.', 'United States'),
+    ('ibdia', 'India'),
+    ('india', 'India'),
+    ('indonesia', 'Indonesia'),
+    ('ireland', 'Ireland'),
+    ('isle of man', 'United Kingdom'),
+    ('israel', 'Israel'),
+    ('italy', 'Italy'),
+    ('jamaica', 'Jamaica'),
+    ('japan', 'Japan'),
+    ('jersey, channel islands', 'United Kingdom'),
+    ('jordan', 'Jordan'),
+    ('kenya', 'Kenya'),
+    ('kuwait', 'Kuwait'),
+    ('latvia', 'Latvia'),
+    ('liechtenstein', 'Liechtenstein'),
+    ('lithuania', 'Lithuania'),
+    ('london', 'United Kingdom'),
+    ('luxembourg', 'Luxembourg'),
+    ('luxemburg', 'Luxembourg'),
+    ('malaysia', 'Malaysia'),
+    ('malta', 'Malta'),
+    ('mexico', 'Mexico'),
+    ('morocco', 'Morocco'),
+    ('myanmar', 'Myanmar'),
+    ('méxico', 'Mexico'),
+    ('nederland', 'The Netherlands'),
+    ('netherlands', 'The Netherlands'),
+    ('new zealand', 'New Zealand'),
+    ('nigeria', 'Nigeria'),
+    ('norway', 'Norway'),
+    ('nz', 'New Zealand'),
+    ('pakistan', 'Pakistan'),
+    ('panamá', 'Panama'),
+    ('phillippines', 'The Phillippines'),
+    ('poland', 'Poland'),
+    ('portugal', 'Portugal'),
+    ('puerto rico', 'United States'),
+    ('qatar', 'Qatar'),
+    ('remote (philippines)', 'The Phillippines'),
+    ('romania', 'Romania'),
+    ('russia', 'Russia'),
+    ('rwanda', 'Rwanda'),
+    ('san francisco', 'United States'),
+    ('saudi arabia', 'Saudi Arabia'),
+    ('serbia', 'Serbia'),
+    ('sierra leone', 'Sierra Leone'),
+    ('singapore', 'Singapore'),
+    ('slovakia', 'Slovakia'),
+    ('slovenia', 'Slovenia'),
+    ('somalia', 'Somalia'),
+    ('south africa', 'South Africa'),
+    ('south korea', 'South Korea'),
+    ('spain', 'Spain'),
+    ('sri lanka', 'Sri Lanka'),
+    ('sweden', 'Sweden'),
+    ('switzerland', 'Switzerland'),
+    ('taiwan', 'Taiwan'),
+    ('tanzania', 'Tanzania'),
+    ('thailand', 'Thailand'),
+    ('the bahamas', 'Bahamas'),
+    ('the netherlands', 'The Netherlands'),
+    ('the us', 'United States'),
+    ('trinidad and tobago', 'Trinidad and Tobago'),
+    ('turkey', 'Turkey'),
+    ('u. s', 'United States'),
+    ('u.k', 'United Kingdom'),
+    ('u.k.', 'United Kingdom'),
+  	('u.s', 'United States'),
+    ('u.s>', 'United States'),
+    ('u.sa', 'United States'),
+    ('uae', 'United Arab Emirates'),
+    ('uganda', 'Uganda'),
+    ('uk', 'United Kingdom'),
+    ('uk, but for globally fully remote company', 'United Kingdom'),
+    ('uk, remote', 'United Kingdom'),
+    ('ukraine', 'Ukraine'),
+    ('united arab emirates', 'United Arab Emirates'),
+    ('united kindom', 'United Kingdom'),
+    ('united kingdom', 'United Kingdom'),
+    ('united kingdom.', 'United Kingdom'),
+    ('united kingdomk', 'United Kingdom'),
+    ('united states', 'United States'),
+    ('unites kingdom', 'United Kingdom'),
+    ('uruguay', 'Uruguay'),
+    ('us', 'United States'),
+    ('us govt employee overseas, country withheld', 'United States'),
+    ('us of a', 'United States'),
+    ('usa', 'United States'),
+    ('usa (company is based in a us territory, i work remote)', 'United States'),
+    ('usa tomorrow', 'United States'),
+    ('usa, but for foreign gov''t', 'United States'),
+    ('usa-- virgin islands', 'United States'),
+    ('vietnam', 'Vietnam'),
+    ('virginia', 'United States'),
+    ('worldwide (based in us but short term trips aroudn the world)', 'United States'),
+    ('zimbabwe', 'Zimbabwe'),
+    ('🇺🇸', 'United States');
+
+-- Check the new table
+
+SELECT * FROM country_mapping
+
+-- Now to bring it back
+   
+UPDATE demographics
+SET country = cm.standardized_country
+FROM country_mapping cm
+WHERE demographics.country = cm.raw_country;
+
+SELECT DISTINCT country
+FROM demographics
+ORDER BY country;
+
+-- Cleaning up the unknowns remaining 
+
+UPDATE demographics
+SET country = 'Unknown'
+WHERE country IS NULL OR country NOT IN (select standardized_country FROM country_mapping); 
+
+SELECT DISTINCT state,
+COUNT(state)
+FROM demographics
+GROUP BY state
+ORDER BY state;
+
+SELECT COUNT(DISTINCT state)
+FROM demographics
+
+-- There a many values here that list multiple states. I am going to make an assumption that people list their primary work state first, and therefore truncate after the first comma
+
+UPDATE demographics
+SET state = 
+    CASE 
+        WHEN INSTR(state, ',') > 0 THEN SUBSTR(state, 1, INSTR(state, ',') - 1)
+        ELSE state
+    END;
+    
+-- Now to handle the 5000+ empty entries 
+
+UPDATE demographics
+SET state = 
+	CASE 
+    	when state = '' AND country = 'United States' THEN 'Unknown'
+    	WHEN state = '' AND country != 'United States' THEN 'International'
+    	ELSE state
+   	END;
+
+SELECT city, 
+state
+FROM demographics
+GROUP by state, city
+ORDER BY state, city;
