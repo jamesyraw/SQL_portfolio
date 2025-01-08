@@ -220,7 +220,7 @@ VALUES
     ('u. s', 'United States'),
     ('u.k', 'United Kingdom'),
     ('u.k.', 'United Kingdom'),
-  	('u.s', 'United States'),
+    ('u.s', 'United States'),
     ('u.s>', 'United States'),
     ('u.sa', 'United States'),
     ('uae', 'United Arab Emirates'),
@@ -262,15 +262,15 @@ SET country = cm.standardized_country
 FROM country_mapping cm
 WHERE demographics.country = cm.raw_country;
 
-SELECT DISTINCT country
-FROM demographics
-ORDER BY country;
-
 -- Cleaning up the unknowns remaining 
 
 UPDATE demographics
 SET country = 'Unknown'
 WHERE country IS NULL OR country NOT IN (select standardized_country FROM country_mapping); 
+
+SELECT DISTINCT country
+FROM demographics
+ORDER BY country;
 
 SELECT DISTINCT state,
 COUNT(state)
@@ -278,10 +278,7 @@ FROM demographics
 GROUP BY state
 ORDER BY state;
 
-SELECT COUNT(DISTINCT state)
-FROM demographics
-
--- There a many values here that list multiple states. I am going to make an assumption that people list their primary work state first, and therefore truncate after the first comma
+-- There are many values here that list multiple states. I am going to assume that people list their primary work state first, and therefore truncate after the first comma
 
 UPDATE demographics
 SET state = 
@@ -290,7 +287,7 @@ SET state =
         ELSE state
     END;
     
--- Now to handle the 5000+ empty entries 
+-- Removing empty entries 
 
 UPDATE demographics
 SET state = 
@@ -299,9 +296,193 @@ SET state =
     	WHEN state = '' AND country != 'United States' THEN 'International'
     	ELSE state
    	END;
+    
+-- Verifying count is 53 (50 states, DC, international, and unknown)
 
-SELECT city, 
-state
+SELECT COUNT(DISTINCT state)
+FROM demographics
+
+-- Now moving on the cities index. This data needs extensive cleaning.
+
+SELECT DISTINCT(city), 
+state,
+COUNT(city)
 FROM demographics
 GROUP by state, city
 ORDER BY state, city;
+
+-- Start with basic cleaning (normalize case, trim extra whitespace, and remove punctuation) 
+
+UPDATE demographics
+SET city = LOWER(city);
+
+UPDATE demographics
+SET city = TRIM(city);
+
+UPDATE demographics
+SET city = REPLACE(city, '.', '')
+WHERE city LIKE '%.%';
+
+-- Standardizing commonly abbreviated terms (e.g. Saint/St, Fort/Ft, or Mount/Mt)
+
+UPDATE demographics
+SET city = REPLACE(city, 'fort', 'ft')
+WHERE city LIKE 'fort %';
+
+UPDATE demographics
+SET city = REPLACE(city, 'saint', 'st')
+WHERE city LIKE 'saint %';
+
+UPDATE demographics
+SET city = REPLACE(city, 'mount', 'mt')
+WHERE city LIKE 'mount %';
+
+-- Removing text before or after specific delimiters. 
+
+SET city = 
+    CASE 
+        WHEN INSTR(city, ',') > 0 THEN SUBSTR(city, 1, INSTR(city, ',') - 1)
+        WHEN INSTR(city, '(') > 0 THEN SUBSTR(city, 1, INSTR(city, '(') - 1)
+        WHEN INSTR(city, '-') > 0 THEN SUBSTR(city, 1, INSTR(city, '-') - 1)
+        WHEN INSTR(city, ' but ') > 0 THEN SUBSTR(city, 1, INSTR(city, ' but ') - 1)
+        WHEN INSTR(city, '/') > 0 THEN SUBSTR(city, 1, INSTR(city, '/') - 1)
+        ELSE city
+    END;
+    
+UPDATE demographics
+SET city = TRIM(SUBSTR(city, INSTR(LOWER(city), 'near') + 4))
+WHERE city LIKE 'near%';
+
+-- Removing non-city entries to a new 'unknown' city name
+-- First I'll remove 'broad stroke' type responses
+
+UPDATE demographics
+SET city = 'unknown'
+WHERE city LIKE '%6%'
+   OR city LIKE '%prefer%'
+   OR city LIKE '%answer%'
+   OR city LIKE '%rural%'
+   OR city LIKE '%too small%'
+   OR city LIKE '%--%'
+   OR city LIKE '%all over%'
+   OR city LIKE '%decline%'
+   OR city LIKE '%travel%'
+   OR city LIKE '%identify%'
+   OR city LIKE '%small city%'
+   OR city LIKE '%redacted%'
+   OR city LIKE '%a major%'
+   OR city LIKE '% sorry%'
+   OR city LIKE '%i work%'
+   OR city LIKE 'can''t say%'
+   OR city LIKE 'a %'
+   OR city LIKE '% anon%'
+   OR city LIKE '%100k%'
+   OR city LIKE '%can''t%'
+   OR city LIKE 'city %'
+   OR city LIKE '%company %'
+   OR city LIKE '%corp hq%'
+   OR city LIKE '%dont want%'
+   OR city LIKE '%approx%'
+   OR city LIKE '%expat%'
+   OR city LIKE '%few hours%'
+   OR city LIKE '%employee%'
+   OR city LIKE '%from home%'
+   OR city LIKE '%full%remote%'
+   OR city LIKE 'hq %'
+   OR city LIKE 'i %'
+   OR city LIKE 'i''m%'
+   OR city LIKE 'job is%'
+   OR city LIKE '%large metro%'
+   OR city LIKE '%major metro%'
+   OR city LIKE '%medium%'
+   OR city LIKE 'my %'
+   OR city LIKE 'northcentral %'
+   OR city LIKE 'northeast %'
+   OR city LIKE 'northern %'
+   OR city LIKE 'northwest %'
+   OR city LIKE 'not %'
+   OR city LIKE 'one of%'
+   OR city LIKE 'outside 5'
+   OR city LIKE '%rather not%'
+   OR city LIKE 'remote%' 
+   OR city LIKE 'small %'
+   OR city LIKE 'southeast %'
+   OR city LIKE 'southern %'
+   OR city LIKE 'southwest %'
+   OR city LIKE '% suburb%'
+   OR city LIKE 'tele%'
+   OR city LIKE 'this %'
+   OR city LIKE 'too %'
+   OR city LIKE '% state'
+   OR city LIKE 'western %'
+   OR city LIKE 'wfh %'
+   OR city LIKE 'work %'
+   OR city LIKE 'would %'
+   OR city LIKE 'x%';
+
+-- And then more specific entries
+
+UPDATE demographics
+SET city = 'unknown' 
+WHERE city IN ('undisclosed','sorry', 'secret','see above','remove','other','no','no city','nope','.','g','fuck off','ff','confidential','at home','all of them','na','test','remote','n/a','none','various','wfh','home','small town','variety','full time remote employee', 'remote worker','s','','..','0000','12043')
+
+-- Finally, merging common city names, nicknames, abbreviations, and misspellings
+
+UPDate demographics
+SET city =
+	CASE 
+    	WHEN city LIKE 'aberdeen %' THEN 'aberdeen'
+        WHEN city LIKE '%chicago%' THEN 'chicago'
+        WHEN city LIKE '%albany%' THEN 'albany'
+        WHEN city LIKE '%albuquerqu%' THEN 'albuquerque'
+        WHEN city LIKE '%alexandri%' THEN 'alexandria'
+        WHEN city LIKE '%anchorag%' THEN 'anchorage' 
+        WHEN city LIKE '%ann arbor%' then 'ann arbor'
+        WHEN city LIKE '%atlanta%' THEN 'atlanta'
+        WHEN city LIKE '%austin%' THEN 'austin'
+        WHEN city LIKE '%baltimore%' THEN 'baltimore' 
+        WHEN city LIKE '%boston%' THEN 'boston'
+        WHEN city LIKE '%calgary%' THEN 'calgary'
+        WHEN city LIKE '%charlotte%' THEN 'charlotte'
+        WHEN city LIKE '%cleveland%' THEN 'cleveland' 
+        WHEN city LIKE '%coeur d%' THEN 'coeur d''alene' 
+        WHEN city LIKE '%d.c%' OR LIKE 'dc %' OR LIKE 'district of %' OR LIKE '% dmv %' OR LIKE 'washington %' then 'washington, dc'
+        WHEN city like '%denver%' then 'denver'
+        WHEN city LIKE '%des moines%' THEN 'des moines'
+        WHEN city LIKE '%detroit%' THEN 'detroit'
+        WHEN city LIKE '%dfw%' THEN 'dallas'
+        WHEN city LIKE '%london%' THEN 'london' 
+        WHEN city LIKE '%madison%' THEN 'madison'
+        WHEN city LIKE '%nashville%' THEN 'nashville'
+        WHEN city LIKE '%new orleans%' THEN 'new orleans'
+        WHEN city LIKE '%new york%' OR LIKE '%nyc%' OR LIKE 'ny %' THEN 'new york city'
+        WHEN city LIKE '%philadelphia%' OR LIKE '%philly%' OR LIKE 'phi%' THEN 'philadelphia' 
+        WHEN city LIKE '%portland%' THEN 'portland' 
+        WHEN city LIKE '%sacramento%' THEN 'sacramento' 
+        WHEN city LIKE '%seattle%' THEN 'seattle'
+        WHEN city LIKE '%toronto%' THEN 'toronto'
+        WHEN city LIKE '%vancouver%' THEN 'vancouver'
+        WHEN city LIKE '%harrisburg%' THEN 'harrisburg'
+        WHEN city LIKE '%houston%' THEN 'houston'
+        WHEN city LIKE '%kansas cit%' THEN 'kansas city'
+        WHEN city LIKE 'la' THEN 'los angeles'
+        WHEN city LIKE '%los ang%' THEN 'los angeles'
+        WHEN city LIKE '%manila%' THEN 'manila' 
+        When city LIKE '%miami%' THEN 'miami' 
+        WHEN city LIKE '%milwaukee%' THEN 'milwaukee'
+        WHEN city LIKE '%minne%polis%' OR city LIKE 'twin cities%' THEN 'minneapolis' 
+        WHEN city LIKE 'montr%al' THEN 'montreal' 
+        WHEN city LIKE '%orlando%' THEN 'orlando' 
+        WHEN city LIKE '%ottawa%' THEN 'ottawa' 
+        WHEN city LIKE 'phoenix %' OR LIKE 'phx%' THEN 'phoenix'
+        WHEN city LIKE 'pittsburgh %' THEN 'pittsburgh'
+        WHEN city LIKE 'raleigh %' THEN 'raleigh' 
+        WHEN city LIKE 'sa% fran%' OR LIKE 'sf%' THEN 'san francisco'
+        WHEN city LIKE 'salt lake%' THEN 'salt lake city'
+        WHEN city LIKE 'sa% mateo%' THEN 'san mateo'
+        WHEN city LIKE 'san antoni%' THEN 'san antonio'
+        WHEN city LIKE 'seat%' THEN 'seattle' 
+        WHEN city LIKE 'san dieg%' OR LIKE 'san deigo%' THEN 'san diego'
+        WHEN city LIKE 'tampa&' THEN 'tampa'
+       ELSE city
+    END;
