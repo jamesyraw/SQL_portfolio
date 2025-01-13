@@ -487,3 +487,23 @@ SET city =
         WHEN city LIKE 'tampa&' THEN 'tampa'
        ELSE city
     END;
+
+--Standardizing race data to only known/unknown values
+
+SELECT race, COUNT(race) FROM demographics
+GROUP BY race
+ORDER BY race
+
+UPDATE demographics
+SET race = 'Unknown'
+WHERE race IN ('','Another option not listed here or prefer not to answer');
+
+UPDATE demographics
+SET race = TRIM(
+  REPLACE(
+    race,
+    ', Another option not listed here or prefer not to answer',
+    ''
+   )
+  )
+ WHERE race LIKE '%, Another option not listed here or prefer not to answer';
