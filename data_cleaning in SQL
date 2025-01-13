@@ -507,3 +507,40 @@ SET race = TRIM(
    )
   )
  WHERE race LIKE '%, Another option not listed here or prefer not to answer';
+
+-- cleaning professions table now
+
+SELECT * FROM professions;
+
+-- Starting with industry column. Standardizing these to the Bureau of Labor Statistics recognized industries. 
+
+SELECT industry, COUNT(industry) FROM professions
+GROUP BY industry
+ORDER BY COUNT(industry) DESC;
+
+SELECT COUNT(DISTINCT industry)
+FROM professions;
+
+UPDATE professions
+SET industry = TRIM(LOWER(industry));
+
+UPDATE professions
+SET industry =
+	CASE
+    	WHEN industry LIKE '%agriculture%' OR industry LIKE '%forestry%' OR industry LIKE '%fishing%' OR industry LIKE '%hunting%' OR industry LIKE '%mining%' OR industry LIKE '%quarrying%' OR '%oil and gas%' THEN 'Natural Resources and Mining'
+        WHEN industry LIKE '%construction%' THEN 'Construction'
+        WHEN industry LIKE '%manufacturing%' THEN 'Manufacturing'
+        WHEN industry LIKE '%trade%' OR industry LIKE '%wholesale%' OR industry LIKE '%transportation%' OR industry LIKE '%warehous%' THEN 'Trade, Transportation, and Utilities'
+        WHEN industry LIKE '%education%' OR industry LIKE '%health%care%' THEN 'Education and Health Services'
+        WHEN industry LIKE '%accounting%' OR industry LIKE '%finance%' OR industry LIKE '%insurance%' OR industry LIKE '%real estate%' OR industry LIKE '%rental%' OR industry LIKE '%leasing%' THEN 'Financial Activities'
+        WHEN industry LIKE '%computing%' OR industry LIKE '%tech%' OR industry LIKE '%information%' THEN 'Information'
+        WHEN industry LIKE '%hospitality%' OR industry LIKE '%hotel%' THEN 'Leisure and Hospitality'
+        WHEN industry lIKE '%nonprofit%' THEN 'Other Services (except Public Administration)'
+        WHEN industry LIke '%marketing%' THEN 'Professional and Business Services'
+        ELSE industry
+      END;
+
+CREATE TABLE industry_mapping (
+  raw_industry TEXT,
+  cleaned_industry TEXT
+ );
