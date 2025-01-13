@@ -527,16 +527,18 @@ SET industry = TRIM(LOWER(industry));
 UPDATE professions
 SET industry =
 	CASE
-    	WHEN industry LIKE '%agriculture%' OR industry LIKE '%forestry%' OR industry LIKE '%fishing%' OR industry LIKE '%hunting%' OR industry LIKE '%mining%' OR industry LIKE '%quarrying%' OR '%oil and gas%' THEN 'Natural Resources and Mining'
-        WHEN industry LIKE '%construction%' THEN 'Construction'
-        WHEN industry LIKE '%manufacturing%' THEN 'Manufacturing'
-        WHEN industry LIKE '%trade%' OR industry LIKE '%wholesale%' OR industry LIKE '%transportation%' OR industry LIKE '%warehous%' THEN 'Trade, Transportation, and Utilities'
-        WHEN industry LIKE '%education%' OR industry LIKE '%health%care%' THEN 'Education and Health Services'
-        WHEN industry LIKE '%accounting%' OR industry LIKE '%finance%' OR industry LIKE '%insurance%' OR industry LIKE '%real estate%' OR industry LIKE '%rental%' OR industry LIKE '%leasing%' THEN 'Financial Activities'
-        WHEN industry LIKE '%computing%' OR industry LIKE '%tech%' OR industry LIKE '%information%' THEN 'Information'
-        WHEN industry LIKE '%hospitality%' OR industry LIKE '%hotel%' THEN 'Leisure and Hospitality'
-        WHEN industry lIKE '%nonprofit%' THEN 'Other Services (except Public Administration)'
-        WHEN industry LIke '%marketing%' THEN 'Professional and Business Services'
+    	WHEN industry LIKE '%resource%' OR industry LIKE '%geolog%' OR industry LIKE '%petroleum%' OR industry LIKE '%renewable%' OR industry LIKE '%horticulture%' OR industry LIKE '%environment%' OR industry LIKE '%energy%' OR industry LIKE '%agriculture%' OR industry LIKE '%forestry%' OR industry LIKE '%fisher%' OR industry LIKE '%fishing%' OR industry LIKE '%hunting%' OR industry LIKE '%mining%' OR industry LIKE '%quarrying%' OR industry LIKE 'oil%' OR industry LIKE 'gas%' THEN 'natural resources and mining'
+        WHEN industry LIKE '%co%struction%' OR industry LIKE '%concrete%' OR industry LIKE '%building%' OR industry LIKE '%plumbing%' THEN 'construction'
+        WHEN industry LIKE '%manufactur%' OR industry LIKE '%aerospace%' OR industry LIKE '%apparel%' OR industry LIKE '%product%' OR industry LIKE '%brewing%' OR industry LIKE '%chemical%' OR industry LIKE '%probiotic%' OR industry LIKE '%protective%' THEN 'manufacturing'
+        WHEN industry LIKE '%utilit%' OR industry LIKE '%distrobution%' OR industry LIKE '%landscap%' OR industry LIKE '%trade%' OR industry LIKE '%wholesale%' OR industry LIKE '%transport%' OR industry LIKE '%warehous%' OR industry LIKE 'auto%' OR industry LIKE '%aviation%' OR industry LIKE '%logistic%' OR industry LIKE '%delivery%' OR industry LIKE '%chain%' OR industry LIKE '%rural%' THEN 'trade, transportation, and utilities'
+        WHEN industry LIKE '%mental%' OR industry LIKE '%medical%' OR industry LIKE '%learning%' OR industry LIKE '%health%' OR industry LIKE '%clinical%' OR industry LIKE '%education%' OR industry LIKE '%health%care%' OR industry LIKE 'child%' OR industry LIKE '%pharma%' OR industry LIKE '%academi%' OR industry LIKE '%animal%' or industry LIKE '%daycare%' OR industry LIKE '%hospital' OR industry LIKE 'psycho%' OR industry LIKE '%counseling%' OR industry LIKE '%caregiver%' OR industry LIKE 'vet%' Or industry LIKE 'esl%' THEN 'education and health services'
+        WHEN industry LIKE '%accounting%' OR industry LIKE '%financ%' OR industry LIKE '%insurance%' OR industry LIKE '%real estate%' OR industry LIKE '%rental%' OR industry LIKE '%leasing%' OR industry LIKE '%mortgage%' OR industry LIKE '%invest%' OR industry LIKE '%equity%' OR industry LIKE '%wealth%' THEN 'financial activities'
+        WHEN industry LIKE '%computing%' OR industry LIKE '%tech%' OR industry LIKE '%information%' OR industry LIKE '%media%' OR industry LIKE '%software%' OR industry LIKE 'data%' OR industry LIKE '%journalis%' OR industry LIKE '%publish%' OR industry LIKE 'telecom%' THEN 'information'
+        WHEN industry LIKE '%restaurant%' OR industry LIKE '%zoo%' OR industry LIKE '%tourism%' OR industry LIKE '%gambling%' OR industry LIKE '%gaming%' OR industry LIKE '%food%' OR industry LIKE '%hospitality%' OR industry LIKE '%hotel%' OR industry LIKE '%leisure%' OR industry LIKE '%entertainment%' THEN 'leisure and hospitality'
+        WHEN industry lIKE '%cleaning%' OR industry LIKE '%janitor%' OR industry LIKE '%beauty%' OR industry LIKE '%funeral%' OR industry LIKE '%tailor%' OR industry LIKE '%politic%' OR industry LIKE '%museum%' OR industry LIKE '%profit%' OR industry LIKE '%librar%' OR industry LIKE '%church%' THEN 'other services (except public administration)'
+        WHEN industry LIke '%security%' OR industry LIKE '%regulat%' OR industry LIKE '%executive%' OR industry LIKE '%marketing%' OR industry LIKE 'law' OR industry LIKE '%consult%' OR industry LIKE '%adminis%' OR industry LIKE '%architect%' OR industry LIKE 'profession%' THEN 'professional and business services'
+        WHEN industry LIKE '%defen%e%' OR industry LIKE '%dot%' OR industry LIKE '%soldier%' OR industry LIKE '%military%' OR industry LIKE '%govt%' OR industry LIKE '%government%' OR industry LIKE '%enforcement%' THEN 'government'
+        WHEN industry LIKE '' OR industry LIKE '%student%' OR industry LIKE '%retired%' OR industry LIKE '%study%' THEN 'unknown'
         ELSE industry
       END;
 
