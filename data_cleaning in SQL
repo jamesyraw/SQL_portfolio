@@ -340,6 +340,7 @@ WHERE city LIKE 'mount %';
 
 -- Removing text before or after specific delimiters. 
 
+UPDATE demographics
 SET city = 
     CASE 
         WHEN INSTR(city, ',') > 0 THEN SUBSTR(city, 1, INSTR(city, ',') - 1)
