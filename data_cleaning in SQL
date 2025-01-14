@@ -448,7 +448,7 @@ SET city =
         WHEN city LIKE '%charlotte%' THEN 'charlotte'
         WHEN city LIKE '%cleveland%' THEN 'cleveland' 
         WHEN city LIKE '%coeur d%' THEN 'coeur d''alene' 
-        WHEN city LIKE '%d.c%' OR LIKE 'dc %' OR LIKE 'district of %' OR LIKE '% dmv %' OR LIKE 'washington %' then 'washington, dc'
+        WHEN city LIKE '%d.c%' OR city LIKE 'dc %' OR city LIKE 'district of %' OR city LIKE '% dmv %' OR city LIKE 'washington %' then 'washington, dc'
         WHEN city like '%denver%' then 'denver'
         WHEN city LIKE '%des moines%' THEN 'des moines'
         WHEN city LIKE '%detroit%' THEN 'detroit'
@@ -457,8 +457,8 @@ SET city =
         WHEN city LIKE '%madison%' THEN 'madison'
         WHEN city LIKE '%nashville%' THEN 'nashville'
         WHEN city LIKE '%new orleans%' THEN 'new orleans'
-        WHEN city LIKE '%new york%' OR LIKE '%nyc%' OR LIKE 'ny %' THEN 'new york city'
-        WHEN city LIKE '%philadelphia%' OR LIKE '%philly%' OR LIKE 'phi%' THEN 'philadelphia' 
+        WHEN city LIKE '%new york%' OR city LIKE '%nyc%' OR city LIKE 'ny %' THEN 'new york city'
+        WHEN city LIKE '%philadelphia%' OR city LIKE '%philly%' OR city LIKE 'phi%' THEN 'philadelphia' 
         WHEN city LIKE '%portland%' THEN 'portland' 
         WHEN city LIKE '%sacramento%' THEN 'sacramento' 
         WHEN city LIKE '%seattle%' THEN 'seattle'
@@ -476,15 +476,15 @@ SET city =
         WHEN city LIKE 'montr%al' THEN 'montreal' 
         WHEN city LIKE '%orlando%' THEN 'orlando' 
         WHEN city LIKE '%ottawa%' THEN 'ottawa' 
-        WHEN city LIKE 'phoenix %' OR LIKE 'phx%' THEN 'phoenix'
+        WHEN city LIKE 'phoenix %' OR city LIKE 'phx%' THEN 'phoenix'
         WHEN city LIKE 'pittsburgh %' THEN 'pittsburgh'
         WHEN city LIKE 'raleigh %' THEN 'raleigh' 
-        WHEN city LIKE 'sa% fran%' OR LIKE 'sf%' THEN 'san francisco'
+        WHEN city LIKE 'sa% fran%' OR city LIKE 'sf%' THEN 'san francisco'
         WHEN city LIKE 'salt lake%' THEN 'salt lake city'
         WHEN city LIKE 'sa% mateo%' THEN 'san mateo'
         WHEN city LIKE 'san antoni%' THEN 'san antonio'
         WHEN city LIKE 'seat%' THEN 'seattle' 
-        WHEN city LIKE 'san dieg%' OR LIKE 'san deigo%' THEN 'san diego'
+        WHEN city LIKE 'san dieg%' OR city LIKE 'san deigo%' THEN 'san diego'
         WHEN city LIKE 'tampa&' THEN 'tampa'
        ELSE city
     END;
@@ -779,3 +779,98 @@ SET currency_other = CASE
  UPDATE professions
  SET currency = currency_other
  WHERE currency = 'OTHER';
+ 
+ SELECT DISTINCT(currency)
+ FROM professions
+ ORDER BY currency
+ 
+ UPDATE professions
+ SET currency_other = ''
+ WHERE LENGTH(currency_other) != 3;
+ 
+UPDATE professions
+SET currency_other =
+REPLACE(currency_other,'N/A','');
+
+UPDATE professions
+SET currency = currency_other
+WHERE currency_other != currency
+AND currency_other LIKE '___';
+
+UPDATE professions
+SET currency = 'EUR'
+WHERE currency = 'EURO';
+
+UPDATE professions
+SET currency = 'UNKNOWN'
+WHERE currency IN ('','HHV');
+
+SELECT country, currency, currency_other
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+WHERE currency = 'AUD/NZD'
+
+UPDATE professions
+SET currency = 
+    CASE 
+        WHEN (SELECT country FROM demographics WHERE demographics.responseID = professions.responseID) = 'Australia' THEN 'AUD'
+        WHEN (SELECT country FROM demographics WHERE demographics.responseID = professions.responseID) = 'New Zealand' THEN 'NZD'
+        ELSE 'UNKNOWN'
+    END
+WHERE currency = 'AUD/NZD';
+
+ALTER TABLE professions
+ADD column salary_in_usd DECIMAL (15,2);
+
+UPDATE professions
+SET salary_in_usd =
+	CASE
+    	WHEN currency = 'ARS' THEN salary * 0.00096
+        WHEN currency = 'AUD' THEN salary * 0.62
+        WHEN currency = 'BDT' then salary * 0.0082 
+        when currency = 'BRL' THEN salary * 0.16505 
+        WHEN currency = 'CAD' THEN salary * 0.7
+        WHEN currency = 'CHF' THEN salary * 1.1 
+        WHEN currency = 'CNY' THEN salary * 0.14
+        WHEN currency = 'COP' THEN salary * 0.00023
+        WHEN currency = 'CZK' THEN salary * 0.041 
+        WHEN currency = 'DKK' THEN salary * 0.14
+        WHEN currency = 'EUR' THEN salary * 1.03
+        WHEN currency = 'GBP' THEN salary * 1.22
+        WHEN currency = 'HKD' THEN salary * 0.13
+        WHEN currency = 'HRK' THEN salary * 0.14244
+        WHEN currency = 'IDR' THEN salary * 0.000061
+        WHEN currency = 'ILS' THEN salary * 0.28
+        WHEN currency = 'INR' THEN salary * 0.012
+        WHEN currency = 'JPY' THEN salary * 0.0063
+        WHEN currency = 'KRW' THEN salary * 0.00069
+        WHEN currency = 'KWD' THEN salary * 3.24
+        WHEN currency = 'LKR' THEN salary * 0.0034
+        WHEN currency = 'MXN' THEN salary * 0.049
+        WHEN currency = 'MYR' THEN salary * 0.222165
+        WHEN currency = 'NGN' THEN salary * 0.00064
+        WHEN currency = 'NOK' THEN salary * 0.088
+        WHEN currency = 'NTD' THEN salary * 0.03
+        WHEN currency = 'NZD' THEN salary * 0.56
+        WHEN currency = 'PHP' THEN salary * 0.017
+        WHEN currency = 'PKR' THEN salary * 0.0036
+        WHEN currency = 'PLN' THEN salary * 0.24
+        WHEN currency = 'SAR' THEN salary * 0.27
+        WHEN currency = 'SEK' THEN salary * 0.089
+        WHEN currency = 'SGD' THEN salary * 0.73
+        WHEN currency = 'THB' THEN salary * 0.029
+        WHEN currency = 'TRY' THEN salary * 0.028
+        WHEN currency = 'TTD' THEN salary * 0.15
+        WHEN currency = 'TWD' THEN salary * 0.03
+        WHEN currency = 'TZS' THEN salary * 0.0004
+        WHEN currency = 'USD' THEN salary * 1
+        WHEN currency = 'ZAR' THEN salary * 0.053
+        ELSE salary
+        END;
+
+UPDATE professions
+SET salary_in_usd = 
+ROUND(salary_in_usd,2);
+
+SELECT salary_in_usd FROM professions;
