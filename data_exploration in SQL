@@ -1,0 +1,29 @@
+SELECT country, ROUND(AVG(salary_in_usd),2) AS average_salary
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+GROUP BY country;
+
+SELECT country, ROUND(AVG(salary_in_usd),2) AS average_salary
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+GROUP BY country
+ORDER BY average_salary DESC;
+
+SELECT country, MAX(salary_in_usd), MIN(salary_in_usd)
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+GROUP BY country
+HAVING COUNT(demographics.responseID) > 1;
+
+SELECT responseid, industry, salary, salary_in_usd
+FROM professions
+ORDER BY salary_in_usd DESC;
+
+SELECT state, ROUND(AVG(salary_in_usd),2) AS average_salary, COUNT(demographics.responseID) AS sample_size
+FROM demographics
+InNER JOIN professions
+ON professions.responseID = demographics.responseID
+GROUP BY state;
