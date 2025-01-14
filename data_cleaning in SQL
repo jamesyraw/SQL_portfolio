@@ -524,25 +524,257 @@ FROM professions;
 UPDATE professions
 SET industry = TRIM(LOWER(industry));
 
-UPDATE professions
-SET industry =
-	CASE
-    	WHEN industry LIKE '%resource%' OR industry LIKE '%geolog%' OR industry LIKE '%petroleum%' OR industry LIKE '%renewable%' OR industry LIKE '%horticulture%' OR industry LIKE '%environment%' OR industry LIKE '%energy%' OR industry LIKE '%agriculture%' OR industry LIKE '%forestry%' OR industry LIKE '%fisher%' OR industry LIKE '%fishing%' OR industry LIKE '%hunting%' OR industry LIKE '%mining%' OR industry LIKE '%quarrying%' OR industry LIKE 'oil%' OR industry LIKE 'gas%' THEN 'natural resources and mining'
-        WHEN industry LIKE '%co%struction%' OR industry LIKE '%concrete%' OR industry LIKE '%building%' OR industry LIKE '%plumbing%' THEN 'construction'
-        WHEN industry LIKE '%manufactur%' OR industry LIKE '%aerospace%' OR industry LIKE '%apparel%' OR industry LIKE '%product%' OR industry LIKE '%brewing%' OR industry LIKE '%chemical%' OR industry LIKE '%probiotic%' OR industry LIKE '%protective%' THEN 'manufacturing'
-        WHEN industry LIKE '%utilit%' OR industry LIKE '%distrobution%' OR industry LIKE '%landscap%' OR industry LIKE '%trade%' OR industry LIKE '%wholesale%' OR industry LIKE '%transport%' OR industry LIKE '%warehous%' OR industry LIKE 'auto%' OR industry LIKE '%aviation%' OR industry LIKE '%logistic%' OR industry LIKE '%delivery%' OR industry LIKE '%chain%' OR industry LIKE '%rural%' THEN 'trade, transportation, and utilities'
-        WHEN industry LIKE '%mental%' OR industry LIKE '%medical%' OR industry LIKE '%learning%' OR industry LIKE '%health%' OR industry LIKE '%clinical%' OR industry LIKE '%education%' OR industry LIKE '%health%care%' OR industry LIKE 'child%' OR industry LIKE '%pharma%' OR industry LIKE '%academi%' OR industry LIKE '%animal%' or industry LIKE '%daycare%' OR industry LIKE '%hospital' OR industry LIKE 'psycho%' OR industry LIKE '%counseling%' OR industry LIKE '%caregiver%' OR industry LIKE 'vet%' Or industry LIKE 'esl%' THEN 'education and health services'
-        WHEN industry LIKE '%accounting%' OR industry LIKE '%financ%' OR industry LIKE '%insurance%' OR industry LIKE '%real estate%' OR industry LIKE '%rental%' OR industry LIKE '%leasing%' OR industry LIKE '%mortgage%' OR industry LIKE '%invest%' OR industry LIKE '%equity%' OR industry LIKE '%wealth%' THEN 'financial activities'
-        WHEN industry LIKE '%computing%' OR industry LIKE '%tech%' OR industry LIKE '%information%' OR industry LIKE '%media%' OR industry LIKE '%software%' OR industry LIKE 'data%' OR industry LIKE '%journalis%' OR industry LIKE '%publish%' OR industry LIKE 'telecom%' THEN 'information'
-        WHEN industry LIKE '%restaurant%' OR industry LIKE '%zoo%' OR industry LIKE '%tourism%' OR industry LIKE '%gambling%' OR industry LIKE '%gaming%' OR industry LIKE '%food%' OR industry LIKE '%hospitality%' OR industry LIKE '%hotel%' OR industry LIKE '%leisure%' OR industry LIKE '%entertainment%' THEN 'leisure and hospitality'
-        WHEN industry lIKE '%cleaning%' OR industry LIKE '%janitor%' OR industry LIKE '%beauty%' OR industry LIKE '%funeral%' OR industry LIKE '%tailor%' OR industry LIKE '%politic%' OR industry LIKE '%museum%' OR industry LIKE '%profit%' OR industry LIKE '%librar%' OR industry LIKE '%church%' THEN 'other services (except public administration)'
-        WHEN industry LIke '%security%' OR industry LIKE '%regulat%' OR industry LIKE '%executive%' OR industry LIKE '%marketing%' OR industry LIKE 'law' OR industry LIKE '%consult%' OR industry LIKE '%adminis%' OR industry LIKE '%architect%' OR industry LIKE 'profession%' THEN 'professional and business services'
-        WHEN industry LIKE '%defen%e%' OR industry LIKE '%dot%' OR industry LIKE '%soldier%' OR industry LIKE '%military%' OR industry LIKE '%govt%' OR industry LIKE '%government%' OR industry LIKE '%enforcement%' THEN 'government'
-        WHEN industry LIKE '' OR industry LIKE '%student%' OR industry LIKE '%retired%' OR industry LIKE '%study%' THEN 'unknown'
-        ELSE industry
-      END;
+DROP TABLE IF EXISTS industry_mapping;
 
 CREATE TABLE industry_mapping (
   raw_industry TEXT,
   cleaned_industry TEXT
  );
+ 
+ INSERT INTO industry_mapping VALUES
+ ('resource','natural resources and mining'),
+ ('geolog','natural resources and mining'),
+ ('petroleum','natural resources and mining'),
+ ('renewable','natural resources and mining'),
+ ('horti','natural resources and mining'),
+ ('enviro','natural resources and mining'),
+ ('energy','natural resources and mining'),
+ ('agric','natural resources and mining'),
+ ('forest','natural resources and mining'), 
+ ('fish','natural resources and mining'),
+ ('hunt','natural resources and mining'),
+ ('mining','natural resources and mining'),
+ ('quarry','natural resources and mining'),
+ ('oil','natural resources and mining'),
+ ('gas ','natural resources and mining'),
+ ('survey','natural resources and mining'),
+ ('urban','construction'),
+ ('construction','construction'),
+ ('costruction','construction'),
+ ('concrete','construction'),
+ ('building','construction'),
+ ('plumbing','construction'),
+ ('manufactur','manufacturing'),
+ ('aerospace','manufacturing'),
+ ('apparel','manufacturing'),
+ ('product','manufacturing'),
+ ('brewing','manufacturing'), 
+ ('chemical','manufacturing'),
+ ('probiotic','manufacturing'),
+ ('protective','manufacturing'),
+ ('beverage','manufacturing'),
+ ('wine','trade, transportation, and utilities'),
+ ('rideshare','trade, transportation, and utilities'),
+ ('translat','trade, transportation, and utilities'),
+ ('utilit','trade, transportation, and utilities'),
+ ('distr','trade, transportation, and utilities'),
+ ('landscap','trade, transportation, and utilities'),
+ ('trade','trade, transportation, and utilities'),
+ ('wholesale','trade, transportation, and utilities'),
+ ('transport','trade, transportation, and utilities'), 
+ ('warehous','trade, transportation, and utilities'),
+ ('repair','trade, transportation, and utilities'),
+ ('auto','trade, transportation, and utilities'), 
+ ('aviation','trade, transportation, and utilities'),
+ ('logistic','trade, transportation, and utilities'),
+ ('delivery','trade, transportation, and utilities'),
+ ('consumer','trade, transportation, and utilities'),
+ ('chain','trade, transportation, and utilities'),
+ ('rural','trade, transportation, and utilities'), 
+ ('retail','trade, transportation, and utilities'),
+ ('sales','trade, transportation, and utilities'),
+ ('service','trade, transportation, and utilities'),
+ ('chemist','education and health services'),
+ ('school','education and health services'),
+ ('scien','education and health services'),
+ ('social work','education and health services'),
+ ('mental','education and health services'),
+ ('medical','education and health services'),
+ ('learn','education and health services'),
+ ('health','education and health services'), 
+ ('clinic','education and health services'),
+ ('educati','education and health services'),
+ ('child','education and health services'),
+ ('pharma','education and health services'),
+ ('academi','education and health services'), 
+ ('animal','education and health services'),
+ ('daycare','education and health services'),
+ ('archaeo','education and health services'),
+ ('hospital','education and health services'),
+ ('psycho','education and health services'),
+ ('counsel','education and health services'), 
+ ('caregiv','education and health services'),
+ ('vet','education and health services'),
+ ('esl','education and health services'),
+ ('toxic','education and health services'), 
+ ('biolog','education and health services'),
+ ('research','education and health services'),
+ ('pet','education and health services'),
+ ('accounting','financial activities'),
+ ('financ','financial activities'),
+ ('insurance','financial activities'),
+ ('real estate','financial activities'),
+ ('philanthro','financial activities'),
+ ('rental','financial activities'),
+ ('housing','financial activities'),
+ ('leasing','financial activities'),
+ ('mortgage','financial activities'),
+ ('invest','financial activities'),
+ ('equity','financial activities'),
+ ('wealth','financial activities'),
+ ('video','information'),
+ ('comput','information'),
+ ('tech','information'),
+ ('informa','information'),
+ ('media','information'),
+ ('software','information'),
+ ('data','information'),
+ ('journalis','information'), 
+ ('publish','information'),
+ ('telecom','information'),
+ ('game dev', 'information'),
+ ('communication','information'),
+ ('e-comm','information'),
+ ('ecomm','information'),
+ ('animation','information'),
+ ('analytic','information'),
+ ('internet','information'),
+ ('virtual','information'),
+ ('user','information'),
+ ('network','information'),
+ ('music','leisure and hospitality'),
+ ('theat','leisure and hospitality'),
+ ('summer','leisure and hospitality'),
+ ('fitness','leisure and hospitality'),
+ ('restaurant','leisure and hospitality'),
+ ('zoo','leisure and hospitality'),
+ ('tourism','leisure and hospitality'),
+ ('gambling','leisure and hospitality'), 
+ ('gaming','leisure and hospitality'),
+ ('food','leisure and hospitality'), 
+ ('hospitality','leisure and hospitality'),
+ ('hotel','leisure and hospitality'),
+ ('leisure','leisure and hospitality'),
+ ('entertain','leisure and hospitality'),
+ ('sports','leisure and hospitality'),
+ ('art','leisure and hospitality'),
+ ('cannabis','leisure and hospitality'),
+ ('editor','other services'),
+ ('clean','other services'),
+ ('janitor','other services'),
+ ('beauty','other services'), 
+ ('funeral','other services'),
+ ('tailor','other services'),
+ ('politic','other services'),
+ ('museum','other services'),
+ ('profit','other services'),
+ ('librar','other services'),
+ ('church','other services'),
+ ('clergy','other services'),
+ ('ministry','other services'),
+ ('religio','other services'),
+ ('internation','other services'),
+ ('fundrais','other services'),
+ ('waste','other services'),
+ ('interpret','other services'),
+ ('labor','other services'),
+ ('faith','other services'),
+ ('testing','professional and business services'),
+ ('compliance','professional and business services'), 
+ ('tank','professional and business services'),
+ ('quality','professional and business services'),
+ ('manage','professional and business services'),
+ ('saas','professional and business services'),
+ ('purchasing','professional and business services'),
+ ('strategy','professional and business services'),
+ ('management','professional and business services'),
+ ('procurement','professional and business services'),
+ ('print','professional and business services'),
+ ('staffing','professional and business services'),
+ ('recruit','professional and business services'),
+ ('contract','professional and business services'),
+ ('security','professional and business services'),
+ ('regulat','professional and business services'),
+ ('executive','professional and business services'),
+ ('market','professional and business services'),
+ ('law','professional and business services'),
+ ('consult','professional and business services'),
+ ('adminis','professional and business services'),
+ ('customer','professional and business services'),
+ ('architect','professional and business services'),
+ ('profession','professional and business services'),
+ ('union','professional and business services'),
+ ('train','professional and business services'),
+ ('private','professional and business services'),
+ ('facilit','professional and business services'),
+ ('corporate','professional and business services'),
+ ('call center','professional and business services'),
+ ('outsourc','professional and business services'),
+ ('defen','government'),
+ ('dot','government'),
+ ('soldier','government'), 
+ ('military','government'),
+ ('govt','government'),
+ ('govern','government'),
+ ('enforce','government'),
+ ('public','government'),
+ ('stud','unknown'),
+ ('retired','unknown'),
+ ('graduate','unknown'),
+ ('homemaker','unknown'),
+ ('family office','unknown'),
+ ('parent','unknown'),
+ ('phd','unknown')
+ ;
+ 
+ SELECT * FROM industry_mapping;
+ 
+UPDATE professions AS p
+SET industry = im.cleaned_industry
+FROM industry_mapping AS im
+WHERE p.industry LIKE CONCAT('%',im.raw_industry,'%')
+ AND im.raw_industry <> '';
+ 
+UPDATE professions
+SET industry = 'unknown'
+WHERE industry is NULL OR industry NOT IN (select cleaned_industry FROM industry_mapping);
+
+SELECT DISTINCT(currency_other) FROM professions;
+
+UPDATE professions
+SET salary = CAST(TRIM(REPLACE(salary,',','')) AS INT);
+
+UPDATE professions
+SET currency = TRIM(UPPER(currency));
+
+UPDATE professions
+SET currency_other = TRIM(UPPER(currency_other));
+
+UPDATE professions
+SET currency_other = CASE
+	WHEN currency_other = 'CZECH CROWNS' THEN 'CZK'
+    WHEN currency_other = 'CROATIAN KUNA' THEN 'HRK'
+    WHEN currency_other IN ('AMERICAN DOLLARS','US DOLLAR') THEN 'USD'
+    WHEN currency_other in ('THAI BAHT','THAI  BAHT') THEN 'THB'
+    WHEN currency_other = 'TAIWANESE DOLLARS' THEN 'TWD'
+    WHEN currency_other = 'SINGAPORE DOLLARA' THEN 'SGD'
+    WHEN currency_other IN ('AUD AUSTRALIAN','AUSTRALIAN DOLLARS') THEN 'AUD'
+    WHEN currency_other IN ('ARGENTINE PESO','ARGENTINIAN PESO (ARS)') THEN 'ARS'
+    WHEN currency_other IN ('BR$','BRL','BRL (R$)') THEN 'BRL'
+    WHEN currency_other IN ('CHINA RMB','RM','RMB (CHINESE YUAN)') THEN 'CNY'
+    when currency_other = 'EQUITY' THEN 'UNKNOWN'
+    WHEN currency_other IN ('ILS','ILS (SHEKEL)','ILS/NIS','ISRAELI SHEKELS','NIS (NEW ISRAELI SHEKEL)') THEN 'ILS'
+    WHEN currency_other IN ('INR (INDIAN RUPEE)','INDIAN RUPEES','RUPEES') THEN 'INR'
+    WHEN currency_other IN ('KRW (KOREAN WON)','KOREAN WON') THEN 'KRW'
+    WHEN currency_other = 'MEXICAN PESOS' THEN 'MXN'
+    WHEN currency_other = 'NORWEGIAN KRONER (NOK)' THEN 'NOK'
+    WHEN currency_other IN ('PLN (POLISH ZLOTY)','PLN (ZWOTY)','POLISH ZłOTY') THEN 'PLN'
+    WHEN currency_other = 'PESO ARGENTINO' THEN 'ARS'
+    WHEN currency_other IN ('PHP (PHILIPPINE PESO)','PHILIPPINE PESO','PHILIPPINE PESOS','PHILIPPINE PESO (PHP)') THEN 'PHP'
+    WHEN currency_other = 'DANISH KRONER' THEN 'DKK'
+    ELSE currency_other
+    END;
+    
+ UPDATE professions
+ SET currency = currency_other
+ WHERE currency = 'OTHER';
