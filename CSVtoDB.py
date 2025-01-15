@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3
-""" This is a Python script that will quickly convert a CSV file into a DB file. I used this to convert my starting data into a DB file so that I could create a database in DB Browser for SQLite """
+""" This is a Python script that will quickly convert a CSV file into a DB file. I had previously used this to convert data into a CSV file so that I could upload it to an online SQL compiler. I did not use it for this project, but kept it in the repo as to show my familiarity with Python """
 def csv_to_sqlite(csv_file, output_db_file, table_name):
     
     try:
