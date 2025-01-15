@@ -873,4 +873,19 @@ UPDATE professions
 SET salary_in_usd = 
 ROUND(salary_in_usd,2);
 
-SELECT salary_in_usd FROM professions;
+SELECT responseid, industry, job_title, salary, currency, salary_in_usd
+FROM professions
+ORDER BY salary_in_usd ASC;
+
+DELETE FROM professions
+WHERE salary_in_usd > 10000000 OR salary_in_usd = 0;
+
+DELETE FROM professions
+WHERE job_title IN ('PhD Candidate','Retired','Student','data science student');
+
+SELECT DISTINCT(job_title)
+FROM professions
+WHERE industry = 'unknown';
+
+UPDATE professions
+SET job_title = TRIM(LOWER(job_title));
