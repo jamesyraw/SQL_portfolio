@@ -18,12 +18,164 @@ ON demographics.responseID = professions.responseID
 GROUP BY country
 HAVING COUNT(demographics.responseID) > 1;
 
-SELECT responseid, industry, salary, salary_in_usd
-FROM professions
-ORDER BY salary_in_usd DESC;
-
 SELECT state, ROUND(AVG(salary_in_usd),2) AS average_salary, COUNT(demographics.responseID) AS sample_size
 FROM demographics
 InNER JOIN professions
 ON professions.responseID = demographics.responseID
 GROUP BY state;
+
+SELECT gender, salary_in_usd
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+WHERE gender != 'Unknown'
+GROUP BY gender;
+
+SELECT country, gender, salary_in_usd
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+WHERE gender != 'Unknown'
+GROUP BY country, gender;
+
+SELECT industry, ROUND(AVG(salary_in_usd),2)
+FROM professions
+GROUP BY industry;
+
+-- finding the highest paying industry per country
+
+WITH CountryIndustryAverages AS (
+    SELECT 
+        country,
+        industry,
+        ROUND(AVG(salary_in_usd),2) AS avg_salary
+    FROM professions
+  	INNER JOIN demographics
+  	ON professions.responseID = demographics.responseID
+    GROUP BY country, industry
+),
+MaxIndustryPerCountry AS (
+    SELECT 
+        country,
+        MAX(avg_salary) AS max_avg_salary
+    FROM CountryIndustryAverages
+    GROUP BY country
+)
+SELECT 
+    cia.country,
+    cia.industry,
+    cia.avg_salary
+FROM CountryIndustryAverages cia
+JOIN MaxIndustryPerCountry mipc
+ON cia.country = mipc.country AND cia.avg_salary = mipc.max_avg_salary;
+
+-- finding the highest paying country per industry with average salary
+
+WITH IndustryCountryAverages AS (
+    SELECT 
+        industry,
+        country,
+        ROUND(AVG(salary_in_usd),2) AS avg_salary
+    FROM professions
+  	INNER JOIN demographics
+  	ON professions.responseID = demographics.responseID
+    GROUP BY industry, country
+),
+MaxCountryPerIndustry AS (
+    SELECT 
+        industry,
+        MAX(avg_salary) AS max_avg_salary
+    FROM IndustryCountryAverages
+    GROUP BY industry
+)
+SELECT 
+    ica.industry,
+    ica.country,
+    ica.avg_salary
+FROM IndustryCountryAverages ica
+JOIN MaxCountryPerIndustry mcpi
+ON ica.industry = mcpi.industry AND ica.avg_salary = mcpi.max_avg_salary;
+
+-- doing the same for states
+
+WITH StateIndustryAverages AS (
+    SELECT 
+        state,
+        industry,
+        ROUND(AVG(salary_in_usd),2) AS avg_salary
+    FROM professions
+  	INNER JOIN demographics
+  	ON professions.responseID = demographics.responseID
+  	WHERE state NOT IN ('Unknown','International')
+    GROUP BY state, industry
+),
+MaxIndustryPerState AS (
+    SELECT 
+        state,
+        MAX(avg_salary) AS max_avg_salary
+    FROM StateIndustryAverages
+    GROUP BY state
+)
+SELECT 
+    sia.state,
+    sia.industry,
+    sia.avg_salary
+FROM StateIndustryAverages sia
+JOIN MaxIndustryPerState mips
+ON sia.state = mips.state AND sia.avg_salary = mips.max_avg_salary;
+
+WITH IndustryStateAverages AS (
+    SELECT 
+        industry,
+        state,
+        ROUND(AVG(salary_in_usd),2) AS avg_salary
+    FROM professions
+  	INNER JOIN demographics
+  	ON professions.responseID = demographics.responseID
+    GROUP BY industry, state
+),
+MaxStatePerIndustry AS (
+    SELECT 
+        industry,
+        MAX(avg_salary) AS max_avg_salary
+    FROM IndustryStateAverages
+    GROUP BY industry
+)
+SELECT 
+    isa.industry,
+    isa.state,
+    isa.avg_salary
+FROM IndustryStateAverages isa
+JOIN MaxStatePerIndustry mspi
+ON isa.industry = mspi.industry AND isa.avg_salary = mspi.max_avg_salary;
+
+SELECT age, ROUND(AVG(salary_in_usd),2)
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+GROUP BY age
+ORder BY age;
+
+SELECT age, industry, ROUND(AVG(salary_in_usd),2)
+FROM demographics
+INNER JOIN professions
+ON demographics.responseID = professions.responseID
+GROUP BY age, industry
+ORder BY age;
+
+-- creating a pivot table to show industry by age 
+
+SELECT 
+    industry,
+    SUM(CASE WHEN age = 'under 18' THEN 1 ELSE 0 END) AS "Under 18",
+    SUM(CASE WHEN age = '18-24' THEN 1 ELSE 0 END) AS "18-24",
+    SUM(CASE WHEN age = '25-34' THEN 1 ELSE 0 END) AS "25-34",
+    SUM(CASE WHEN age = '35-44' THEN 1 ELSE 0 END) AS "35-44",
+    SUM(CASE WHEN age = '45-54' THEN 1 ELSE 0 END) AS "45-54",
+    SUM(CASE WHEN age = '55-64' THEN 1 ELSE 0 END) AS "55-64",
+    SUM(CASE WHEN age = '65 or over' THEN 1 ELSE 0 END) AS "65 or over"
+FROM professions
+INNER JOIN demographics
+ON professions.responseID = demographics.responseID
+GROUP BY industry
+ORDER BY industry;
